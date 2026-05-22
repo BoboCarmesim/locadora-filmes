@@ -29,6 +29,28 @@ const FilmeModel = {
         }
 
         return filmeId
+    },
+
+    async findById( id ) {
+        const filmeResult = await connection.raw(
+            "SELECT * FROM filmes WHERE id = ?",
+            [ id ]
+        )
+
+        const filme = filmeResult[0]
+
+        if (!filme) return null
+
+      const generos = await connection.raw(`
+        SELECT g.id, g.nome FROM generos g
+        JOIN filmes_generos fg on g.id = fg.genero_id
+        WHERE fg.filme_id = ?
+        `, [ id ] )
+
+        return{
+            ...filme,
+            generos
+        }
     }
 }
 module.exports = FilmeModel
